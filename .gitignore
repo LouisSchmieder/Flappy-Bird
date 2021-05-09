@@ -1,0 +1,8 @@
+# Binaries for programs and plugins
+main
+flappy_bird
+*.exe
+*.exe~
+*.so
+*.dylib
+*.dll
