@@ -18,6 +18,7 @@ mut:
 	buffer1          [][]bool
 	cur_buf          bool
 	framerate        int
+	frames           int
 	player           Player
 	global_offset    int = 40
 	last             int
@@ -30,6 +31,7 @@ struct DoubleSprite {
 mut:
 	top_sprite    Sprite
 	bottom_sprite Sprite
+	hitted        bool
 }
 
 struct Sprite {
@@ -42,6 +44,8 @@ mut:
 
 struct Player {
 	Sprite
+mut:
+	score int
 }
 
 fn main() {
@@ -144,8 +148,9 @@ fn (mut app App) create_border() {
 fn framerate(data voidptr) {
 	mut app := &App(data)
 	for app.alive {
-		time.sleep(1000)
-		app.framerate = 0
+		time.sleep(time.second)
+		app.framerate = app.frames
+		app.frames = 0
 	}
 }
 
@@ -211,7 +216,7 @@ fn (mut app App) collide(sprite int) bool {
 	pty := app.player.y // player top y
 	pby := app.player.y + app.player.height // player bottom y
 
-	ds := app.sprites[sprite]
+	mut ds := app.sprites[sprite]
 
 	ts := ds.top_sprite
 	sl := ts.x + app.global_offset // sprite left
@@ -224,6 +229,11 @@ fn (mut app App) collide(sprite int) bool {
 		// inside x
 		if pty <= sh || pby >= bsy {
 			return true
+		}
+		if !ds.hitted {
+			ds.hitted = true
+			app.player.score++
+			app.sprites[sprite] = ds
 		}
 	}
 	return false
@@ -269,7 +279,8 @@ fn render(data voidptr) {
 			buf.free()
 		}
 		mut spaces := 4 - app.framerate.str().len
-		app.session.write_string(0, playfield_height + 3, '$spaces$app.framerate FPS   X: $app.player.x Y: $app.player.y')
+		mut s := 4 - app.player.score.str().len
+		app.session.write_string(0, playfield_height + 3, 'Score: ${' '.repeat(s)}$app.player.score    FPS: ${' '.repeat(spaces)}$app.framerate')
 		app.session.refresh()
 		if app.cur_buf {
 			app.buffer1 = [][]bool{len: playfield_height, init: []bool{len: playfield_width}}
@@ -277,7 +288,7 @@ fn render(data voidptr) {
 			app.buffer0 = [][]bool{len: playfield_height, init: []bool{len: playfield_width}}
 		}
 		app.cur_buf = !app.cur_buf
-		app.framerate++
+		app.frames++
 		time.sleep(time.millisecond * i64(1000 / framerate))
 	}
 }
