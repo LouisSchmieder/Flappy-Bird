@@ -59,6 +59,7 @@ fn main() {
 	app.buffer1 = [][]bool{len: playfield_height, init: []bool{len: playfield_width}}
 	app.cur_buf = false
 	app.alive = true
+	app.session.curs_set(0) or { panic(err) }
 
 	app.player = Player{}
 	app.player.x = 10

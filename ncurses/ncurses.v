@@ -13,6 +13,7 @@ fn C.keypad(window &C._win_st, b bool) i16
 fn C.getch() i16
 fn C.wmove(window &C._win_st, y i16, x i16) i16
 fn C.winsdelln(window &C._win_st, line i16) i16
+fn C.curs_set(visibility i16) i16
 
 struct C._win_st {
 	_cury       i16
@@ -49,6 +50,15 @@ pub struct SessionConfig {
 struct Session {
 	config  SessionConfig
 	mainwin &C._win_st
+}
+
+// Set the cursor visibility. Returns the last mode or an error. 0 invisible 1 normal 2 high visibility
+pub fn curs_set(visibility i16) ?i16 {
+	last := C.curs_set(visibility)
+	if last < 0 {
+		return error('Error setting the cursor visiblity to $visibility')
+	}
+	return last
 }
 
 pub fn create_session(config SessionConfig) ?&Session {
