@@ -59,7 +59,7 @@ fn main() {
 	app.buffer1 = [][]bool{len: playfield_height, init: []bool{len: playfield_width}}
 	app.cur_buf = false
 	app.alive = true
-	app.session.curs_set(0) or { panic(err) }
+	ncurses.curs_set(0) or { panic(err) }
 
 	app.player = Player{}
 	app.player.x = 10
@@ -158,9 +158,9 @@ fn framerate(data voidptr) {
 fn input(data voidptr) {
 	mut app := &App(data)
 	for app.alive {
-		char := app.session.get_char() or { ` ` }
+		ch := app.session.get_char() or { ` ` }
 
-		if char == 32 {
+		if ch == 32 {
 			if app.player.y - 1 > 0 {
 				app.player.y -= 2
 			}
