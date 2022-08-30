@@ -47,7 +47,7 @@ pub struct SessionConfig {
 	use_keyboard bool
 }
 
-struct Session {
+pub struct Session {
 	config  SessionConfig
 	mainwin &C._win_st
 }
@@ -90,12 +90,12 @@ pub fn (mut session Session) write_string(x i16, y i16, str string) {
 	C.mvaddstr(y, x, str.str)
 }
 
-pub fn (mut session Session) get_char() ?byte {
+pub fn (mut session Session) get_char() ?u8 {
 	if !session.config.use_keyboard {
 		return error('Keyboard usage is not enabled!')
 	}
 	ch := C.getch()
-	return byte(ch)
+	return u8(ch)
 }
 
 pub fn (mut session Session) move(x i16, y i16) {

@@ -49,7 +49,7 @@ mut:
 }
 
 fn main() {
-	mut app := App{}
+	mut app := &App{}
 	mut session := ncurses.create_session(use_keyboard: true) or { panic(err) }
 	app.session = session
 
@@ -87,11 +87,11 @@ fn main() {
 
 	app.sprites[2] = app.create_sprite()
 
-	go render(&app)
-	go framerate(&app)
-	go input(&app)
-	go physics(&app)
-	go game_logic(&app)
+	go render(mut app)
+	go framerate(mut app)
+	go input(mut app)
+	go physics(mut app)
+	go game_logic(mut app)
 
 	for app.alive {
 		// draw player
@@ -146,8 +146,7 @@ fn (mut app App) create_border() {
 	app.session.refresh()
 }
 
-fn framerate(data voidptr) {
-	mut app := &App(data)
+fn framerate(mut app App) {
 	for app.alive {
 		time.sleep(time.second)
 		app.framerate = app.frames
@@ -155,8 +154,7 @@ fn framerate(data voidptr) {
 	}
 }
 
-fn input(data voidptr) {
-	mut app := &App(data)
+fn input(mut app App) {
 	for app.alive {
 		ch := app.session.get_char() or { ` ` }
 
@@ -168,8 +166,7 @@ fn input(data voidptr) {
 	}
 }
 
-fn physics(data voidptr) {
-	mut app := &App(data)
+fn physics(mut app App) {
 	for app.alive {
 		if app.player.y + f32(app.player.height) < f32(playfield_height) {
 			if app.player.y + 0.4 >= f32(playfield_height) {
@@ -182,8 +179,7 @@ fn physics(data voidptr) {
 	}
 }
 
-fn game_logic(data voidptr) {
-	mut app := &App(data)
+fn game_logic(mut app App) {
 	for app.alive {
 		app.global_offset--
 
@@ -242,7 +238,7 @@ fn (mut app App) collide(sprite int) bool {
 
 fn (mut app App) create_sprite() DoubleSprite {
 	seed.time_seed_32()
-	height := rand.int_in_range(2, 18)
+	height := rand.int_in_range(2, 18) or { 2 }
 	ds := DoubleSprite{
 		top_sprite: Sprite{
 			x: app.last + 40
@@ -261,8 +257,7 @@ fn (mut app App) create_sprite() DoubleSprite {
 	return ds
 }
 
-fn render(data voidptr) {
-	mut app := &App(data)
+fn render(mut app App) {
 	for app.alive {
 		buf := if app.cur_buf { app.buffer1 } else { app.buffer0 }
 		for y, line in buf {
